@@ -98,7 +98,7 @@ contract DeployMarketplace is Script {
             "NFTModule: ownership incorrecto"
         );
         require(
-            PaymentManager(addresses.paymentManager).owner() == addresses.marketplace,
+            Ownable(addresses.paymentManager).owner() == addresses.marketplace,
             "PaymentManager: ownership incorrecto"
         );
         require(

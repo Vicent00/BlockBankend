@@ -3,8 +3,11 @@ pragma solidity 0.8.26;
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract PaymentManager is ReentrancyGuard {
+contract PaymentManager is ReentrancyGuard, Ownable {
+    constructor() Ownable(msg.sender) {}
+    
     // Mapping para almacenar los saldos pendientes de retiro
     mapping(address => mapping(address => uint256)) public pendingWithdrawals; // token => user => amount
 

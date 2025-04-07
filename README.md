@@ -1,4 +1,4 @@
-# 🎨 NFT Marketplace on Arbitrum
+# BlockBankend NFT MarketPlace
 
 ![Marketplace Architecture](WEB3notransparent.png)
 
@@ -338,6 +338,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📧 Contact
 
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
+Vicent00 - [@email](https://mailto:hello@vicenteaguilar.com)
 
 Project Link: [https://github.com/Vicent00/BlockBankend](https://github.com/Vicent00/BlockBankend)

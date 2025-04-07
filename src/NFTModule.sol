@@ -9,7 +9,11 @@ contract NFTModule is IERC721Receiver {
     mapping(address => mapping(uint256 => bool)) public isInCustody;
 
     // Eventos
-    event NFTCustodyChanged(address indexed nftContract, uint256 indexed tokenId, bool inCustody);
+    event NFTCustodyChanged(
+        address indexed nftContract,
+        uint256 indexed tokenId,
+        bool inCustody
+    );
 
     // Función para verificar la propiedad de un NFT
     function verifyOwnership(
@@ -26,8 +30,12 @@ contract NFTModule is IERC721Receiver {
         uint256 tokenId,
         address operator
     ) external view returns (bool) {
-        return IERC721(nftContract).getApproved(tokenId) == operator ||
-               IERC721(nftContract).isApprovedForAll(IERC721(nftContract).ownerOf(tokenId), operator);
+        return
+            IERC721(nftContract).getApproved(tokenId) == operator ||
+            IERC721(nftContract).isApprovedForAll(
+                IERC721(nftContract).ownerOf(tokenId),
+                operator
+            );
     }
 
     // Función para transferir un NFT
@@ -94,4 +102,4 @@ contract NFTModule is IERC721Receiver {
     ) external pure returns (bytes4) {
         return this.onERC721Received.selector;
     }
-} 
+}

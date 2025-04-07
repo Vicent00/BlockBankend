@@ -1,28 +1,216 @@
-# NFT Marketplace Core Contract
+# 🎨 NFT Marketplace on Arbitrum
 
-This smart contract implements a decentralized NFT marketplace with support for both fixed-price sales and auctions. The contract is built on Solidity 0.8.26 and uses OpenZeppelin's ReentrancyGuard and Ownable contracts for security.
+![Marketplace Architecture](WEB3notransparent.png)
 
-## Features
+## 📝 Description
 
-- Fixed-price NFT listings
-- Auction system with commit-reveal mechanism
-- Support for both ETH and ERC-20 token payments
-- Fee and royalty distribution system
-- Front-running protection
-- Secure custody management for NFTs
+This NFT marketplace is a decentralized platform built on Arbitrum that enables the buying, selling, and auctioning of NFTs with support for ETH and ERC-20 token payments. The system implements advanced features such as front-running protection, fee and royalty management, and a secure NFT custody system.
 
-## Core Components
+## 🚀 Key Features
 
-The contract integrates with three main modules:
-- `NFTModule`: Handles NFT ownership verification and transfers
-- `PaymentManager`: Manages payment processing and custody
-- `FeeRoyaltyManager`: Handles fee calculations and royalty distributions
+- ✅ Direct NFT sales
+- 🏷️ Auction system with commit-reveal mechanism
+- 💰 Support for ETH and ERC-20 tokens
+- 🛡️ Front-running protection
+- 📊 Fee and royalty system
+- 🔒 Secure NFT custody
+- ⚡ Optimized for Arbitrum
 
-## Key Functions
+## 🏗️ System Architecture
 
-### Listing Management
+The marketplace is composed of 4 main contracts:
 
-#### `createListing`
+1. **MarketplaceCore**: Main contract that coordinates all operations
+2. **NFTModule**: Manages NFT custody and transfers
+3. **PaymentManager**: Handles payments and funds
+4. **FeeRoyaltyManager**: Manages fees and royalties
+
+## 🔒 Security Implementation
+
+### 1. Reentrancy Protection
+```solidity
+contract MarketplaceCore is ReentrancyGuard {
+    // All critical functions are protected by nonReentrant modifier
+    function buyNFT(uint256 listingId) external nonReentrant {
+        // Implementation
+    }
+}
+```
+- Uses OpenZeppelin's ReentrancyGuard
+- Prevents reentrancy attacks in all critical functions
+- Ensures atomic operations for payments and transfers
+
+### 2. Front-Running Protection
+```solidity
+// Commit-Reveal Pattern for Auctions
+function commitBid(uint256 listingId, bytes32 commitment) external {
+    require(block.timestamp >= listing.startTime, "Auction not started");
+    require(block.timestamp <= listing.endTime, "Auction ended");
+    // Store commitment
+}
+
+function revealBid(uint256 listingId, uint256 amount, bytes32 nonce) external {
+    require(keccak256(abi.encodePacked(amount, nonce)) == commitment, "Invalid reveal");
+    // Process bid
+}
+```
+- Implements commit-reveal pattern for auctions
+- Prevents bid sniping and front-running
+- Minimum time between bids (3 minutes)
+- Minimum bid increment (5%)
+
+### 3. Secure Custody Management
+```solidity
+contract NFTModule is Ownable {
+    // Secure NFT custody during listings
+    function takeCustody(address nftContract, uint256 tokenId) external onlyOwner {
+        IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+    }
+}
+```
+- NFTs held in custody during listings
+- Only authorized contracts can manage custody
+- Secure transfer mechanisms
+
+### 4. Payment Security
+```solidity
+contract PaymentManager is ReentrancyGuard {
+    // Secure payment processing
+    function processPayment(address token, address from, address to, uint256 amount) internal {
+        if (token == address(0)) {
+            // Handle ETH
+            (bool success, ) = to.call{value: amount}("");
+            require(success, "ETH transfer failed");
+        } else {
+            // Handle ERC-20
+            IERC20(token).transferFrom(from, to, amount);
+        }
+    }
+}
+```
+- Secure handling of both ETH and ERC-20 tokens
+- Protected against reentrancy
+- Proper error handling
+
+### 5. Access Control
+```solidity
+contract FeeRoyaltyManager is Ownable {
+    // Only owner can modify critical parameters
+    function setFeeRate(uint256 newRate) external onlyOwner {
+        require(newRate <= MAX_FEE_RATE, "Fee too high");
+        feeRate = newRate;
+    }
+}
+```
+- Role-based access control
+- Owner-only critical functions
+- Parameter validation
+
+## 🛡️ Protected Against Common Attacks
+
+### 1. Reentrancy Attacks
+- Protected by ReentrancyGuard
+- Checks-Effects-Interactions pattern
+- Atomic operations
+
+### 2. Front-Running
+- Commit-reveal pattern for auctions
+- Minimum time between operations
+- Hidden bid amounts
+
+### 3. Denial of Service (DoS)
+- Gas optimization
+- Batch operations where possible
+- Proper error handling
+
+### 4. Integer Overflow/Underflow
+- SafeMath operations
+- Input validation
+- Range checks
+
+### 5. Unauthorized Access
+- Role-based access control
+- Proper ownership management
+- Function visibility control
+
+## 📊 Operation Flow
+
+### 1. NFT Listing
+```mermaid
+sequenceDiagram
+    Seller->>NFTModule: Verify ownership
+    NFTModule->>MarketplaceCore: Approval
+    MarketplaceCore->>NFTModule: Take custody
+    MarketplaceCore->>MarketplaceCore: Create listing
+```
+
+### 2. Direct Sale
+```mermaid
+sequenceDiagram
+    Buyer->>MarketplaceCore: Initiate purchase
+    MarketplaceCore->>FeeRoyaltyManager: Calculate fees
+    MarketplaceCore->>PaymentManager: Process payment
+    PaymentManager->>Seller: Transfer funds
+    MarketplaceCore->>NFTModule: Transfer NFT
+```
+
+### 3. Auction System
+```mermaid
+sequenceDiagram
+    Bidder->>MarketplaceCore: Commit bid
+    MarketplaceCore->>MarketplaceCore: Wait 3 min
+    Bidder->>MarketplaceCore: Reveal bid
+    MarketplaceCore->>PaymentManager: Hold funds
+    MarketplaceCore->>MarketplaceCore: Update highest bid
+```
+
+## 📜 Contracts Deployed on Arbitrum
+
+| Contract | Address |
+|----------|-----------|
+| MarketplaceCore | [0xB4ae89e0635F6bdF92F64C76d53964e1060e11b4](https://arbiscan.io/address/0xB4ae89e0635F6bdF92F64C76d53964e1060e11b4) |
+| NFTModule | [0x1140D367432f720879b817F404c577620B765531](https://arbiscan.io/address/0x1140D367432f720879b817F404c577620B765531) |
+| PaymentManager | [0x46B7bA6D27869624B013705a9C433feefb15bE69](https://arbiscan.io/address/0x46B7bA6D27869624B013705a9C433feefb15bE69) |
+| FeeRoyaltyManager | [0x45994782c576AB76592E5CaE528151d0E56D65e9](https://arbiscan.io/address/0x45994782c576AB76592E5CaE528151d0E56D65e9) |
+
+## 🛠️ How to Deploy
+
+1. **Initial Setup**
+```bash
+# Install dependencies
+forge install foundry-rs/forge-std
+forge install OpenZeppelin/openzeppelin-contracts
+
+# Configure .env
+PRIVATE_KEY=0x...
+ARBITRUM_RPC_URL=https://arb1.arbitrum.io/rpc
+ARBISCAN_API_KEY=...
+```
+
+2. **Compilation**
+```bash
+forge build
+```
+
+3. **Deployment**
+```bash
+forge script script/DeployMarketplace.s.sol:DeployMarketplace \
+    --rpc-url https://arb1.arbitrum.io/rpc \
+    --broadcast \
+    --verify \
+    --legacy \
+    -vvvv
+```
+
+## 🔍 Code Explanation
+
+### MarketplaceCore
+The main contract that coordinates all operations:
+- Listing management
+- Auction system
+- Integration with other modules
+
+#### Key Functions
 ```solidity
 function createListing(
     address nftContract,
@@ -31,181 +219,125 @@ function createListing(
     address paymentToken,
     bool isAuction,
     uint256 auctionDuration
-)
+) external nonReentrant {
+    // Implementation
+}
+
+function buyNFT(uint256 listingId) external payable nonReentrant {
+    // Implementation
+}
 ```
-Creates a new NFT listing with the following features:
-- Verifies NFT ownership and approval
-- Takes NFT into marketplace custody
-- Supports both fixed-price and auction listings
-- Minimum auction duration of 1 day
-- Configurable payment token (ETH or ERC-20)
 
-### Auction System
+### NFTModule
+Handles NFT custody and transfers:
+- Ownership verification
+- Secure transfers
+- Approval management
 
-#### `commitBid`
+#### Key Functions
 ```solidity
-function commitBid(uint256 listingId, bytes32 commitment)
-```
-Implements the commit-reveal pattern for auction bids:
-- Prevents front-running by hiding bid amounts
-- Requires minimum time between bids (3 minutes)
-- Stores bid commitments with timestamps
+function verifyOwnership(
+    address nftContract,
+    uint256 tokenId,
+    address owner
+) external view returns (bool) {
+    // Implementation
+}
 
-#### `revealBid`
+function transferNFT(
+    address nftContract,
+    uint256 tokenId,
+    address from,
+    address to
+) external onlyOwner {
+    // Implementation
+}
+```
+
+### PaymentManager
+Manages payments:
+- Support for ETH and ERC-20
+- Fund holding
+- Payment distribution
+
+#### Key Functions
 ```solidity
-function revealBid(uint256 listingId, uint256 amount, bytes32 nonce)
+function processPayment(
+    address token,
+    address from,
+    address to,
+    uint256 amount
+) internal nonReentrant {
+    // Implementation
+}
+
+function withdrawFunds(
+    address token,
+    uint256 amount
+) external nonReentrant {
+    // Implementation
+}
 ```
-Reveals previously committed bids:
-- Verifies bid commitment matches revealed amount
-- Enforces minimum bid increment (5%)
-- Processes payments and updates highest bid
-- Returns previous highest bid to the bidder
 
-### Purchase Functions
+### FeeRoyaltyManager
+Manages fees and royalties:
+- Fee calculation
+- Royalty distribution
+- Rate configuration
 
-#### `buyNFT`
+#### Key Functions
 ```solidity
-function buyNFT(uint256 listingId)
-```
-Handles fixed-price NFT purchases:
-- Processes payments through PaymentManager
-- Distributes fees and royalties
-- Transfers NFT to buyer
-- Supports both ETH and ERC-20 payments
+function calculateFees(
+    uint256 amount
+) external view returns (uint256 fee, uint256 royalty) {
+    // Implementation
+}
 
-#### `endAuction`
+function distributeFees(
+    address token,
+    uint256 amount,
+    address seller,
+    address creator
+) external nonReentrant {
+    // Implementation
+}
+```
+
+## 📚 Technical Documentation
+
+### Important Constants
 ```solidity
-function endAuction(uint256 listingId)
+uint256 public constant MIN_BID_INCREMENT_PERCENT = 5;     // 5% minimum increment
+uint256 public constant MIN_TIME_BETWEEN_BIDS = 3 minutes; // Time between bids
+uint256 public constant COMMIT_REVEAL_WINDOW = 10 minutes; // Reveal window
+uint256 public constant MIN_AUCTION_DURATION = 1 days;     // Minimum duration
+uint256 public constant MAX_FEE_RATE = 1000;              // 10% maximum fee
 ```
-Finalizes auction listings:
-- Verifies auction has ended
-- Distributes final payments
-- Transfers NFT to winning bidder
-- Handles fee and royalty distribution
 
-### Listing Management
-
-#### `cancelListing`
+### Events
 ```solidity
-function cancelListing(uint256 listingId)
+event ListingCreated(uint256 indexed listingId, address indexed seller, ...);
+event PurchaseMade(uint256 indexed listingId, address indexed buyer, ...);
+event BidCommitted(uint256 indexed listingId, address indexed bidder, ...);
+event AuctionEnded(uint256 indexed listingId, address indexed winner, ...);
+event FeeUpdated(uint256 newFeeRate);
+event RoyaltyPaid(address indexed creator, uint256 amount);
 ```
-Allows sellers to cancel their listings:
-- Verifies seller ownership
-- Returns NFT to original owner
-- Marks listing as inactive
 
-## Security Features
+## 🤝 Contributing
 
-- Reentrancy protection using OpenZeppelin's ReentrancyGuard
-- Commit-reveal pattern for auction bids
-- Minimum time between bids (3 minutes)
-- Minimum bid increment (5%)
-- Secure custody management for NFTs
-- Proper payment handling for both ETH and ERC-20 tokens
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Events
+## 📄 License
 
-The contract emits the following events:
-- `ListingCreated`: When a new listing is created
-- `ListingCancelled`: When a listing is cancelled
-- `PurchaseMade`: When an NFT is purchased
-- `BidCommitted`: When a bid is committed in an auction
-- `BidRevealed`: When a bid is revealed in an auction
-- `AuctionEnded`: When an auction is finalized
+Distributed under the MIT License. See `LICENSE` for more information.
 
-## Constants
+## 📧 Contact
 
-- `MIN_BID_INCREMENT_PERCENT`: 5% minimum bid increment
-- `MIN_TIME_BETWEEN_BIDS`: 3 minutes between bids
-- `COMMIT_REVEAL_WINDOW`: 10 minutes to reveal bids
-- `MIN_AUCTION_DURATION`: 1 day minimum auction duration
+Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
 
-## Flujo de Contratos y Funcionamiento
-
-### 1. Estructura General
-El marketplace está compuesto por 4 contratos principales que interactúan entre sí:
-
-1. **MarketplaceCore**: Contrato principal que coordina todas las operaciones
-2. **NFTModule**: Gestiona la custodia y transferencia de NFTs
-3. **PaymentManager**: Maneja los pagos y fondos
-4. **FeeRoyaltyManager**: Administra comisiones y regalías
-
-### 2. Flujo de Listado y Venta
-
-#### 2.1 Listado de NFT
-1. El vendedor llama a `createListing` en MarketplaceCore
-2. MarketplaceCore verifica con NFTModule:
-   - Propiedad del NFT
-   - Aprobación para transferencia
-3. NFTModule toma el NFT en custodia
-4. Se crea el listado con los detalles de precio y tipo (subasta o precio fijo)
-
-#### 2.2 Venta Directa (Precio Fijo)
-1. Comprador llama a `buyNFT`
-2. MarketplaceCore:
-   - Verifica que el listado está activo
-   - Solicita a FeeRoyaltyManager calcular comisiones
-   - Envía el pago a PaymentManager
-3. PaymentManager:
-   - Procesa el pago (ETH o ERC-20)
-   - Distribuye fondos al vendedor y comisiones
-4. NFTModule transfiere el NFT al comprador
-
-#### 2.3 Subasta
-1. **Fase de Ofertas**:
-   - Los postores llaman a `commitBid` con un hash de su oferta
-   - Deben esperar 3 minutos entre ofertas
-   - Tienen 10 minutos para revelar su oferta
-
-2. **Revelación de Ofertas**:
-   - Los postores llaman a `revealBid`
-   - Se verifica que la oferta sea mayor que la anterior + 5%
-   - PaymentManager retiene los fondos de la oferta más alta
-   - Se devuelven los fondos de la oferta anterior
-
-3. **Finalización de Subasta**:
-   - Cualquiera puede llamar a `endAuction` después del tiempo límite
-   - FeeRoyaltyManager calcula comisiones finales
-   - PaymentManager distribuye los fondos
-   - NFTModule transfiere el NFT al ganador
-
-### 3. Gestión de Fondos
-
-1. **ETH**:
-   - Los fondos se envían directamente al contrato
-   - PaymentManager los distribuye según las reglas establecidas
-
-2. **ERC-20**:
-   - Los tokens deben ser aprobados previamente
-   - PaymentManager maneja las transferencias de tokens
-   - Se distribuyen según las reglas de comisiones
-
-### 4. Seguridad y Protecciones
-
-1. **ReentrancyGuard**:
-   - Previene ataques de reentrada en todas las funciones críticas
-   - Protege especialmente las operaciones de pago
-
-2. **Commit-Reveal**:
-   - Protege contra front-running en subastas
-   - Las ofertas se revelan después de un tiempo mínimo
-
-3. **Custodia de NFTs**:
-   - NFTs se mantienen en custodia durante el listado
-   - Solo se transfieren después de confirmación de pago
-   - Se pueden devolver al vendedor si se cancela el listado
-
-### 5. Eventos y Seguimiento
-
-El contrato emite eventos en cada paso importante:
-- Creación de listados
-- Ofertas en subastas
-- Compras directas
-- Finalización de subastas
-- Cancelaciones
-
-Estos eventos permiten:
-- Seguimiento de transacciones
-- Construcción de interfaces de usuario
-- Auditoría de operaciones
-- Análisis de mercado
+Project Link: [https://github.com/Vicent00/BlockBankend](https://github.com/Vicent00/BlockBankend)

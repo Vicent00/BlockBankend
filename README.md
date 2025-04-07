@@ -1,10 +1,21 @@
 # BlockBankend NFT MarketPlace
 
-![Marketplace Architecture](WEB3notransparent.png)
-
 ## 📝 Description
 
 This NFT marketplace is a decentralized platform built on Arbitrum that enables the buying, selling, and auctioning of NFTs with support for ETH and ERC-20 token payments. The system implements advanced features such as front-running protection, fee and royalty management, and a secure NFT custody system.
+
+
+![Marketplace Architecture](WEB3notransparent.png)
+
+
+## 📜 Contracts Deployed on Arbitrum
+
+| Contract | Address |
+|----------|-----------|
+| MarketplaceCore | [0xB4ae89e0635F6bdF92F64C76d53964e1060e11b4](https://arbiscan.io/address/0xB4ae89e0635F6bdF92F64C76d53964e1060e11b4) |
+| NFTModule | [0x1140D367432f720879b817F404c577620B765531](https://arbiscan.io/address/0x1140D367432f720879b817F404c577620B765531) |
+| PaymentManager | [0x46B7bA6D27869624B013705a9C433feefb15bE69](https://arbiscan.io/address/0x46B7bA6D27869624B013705a9C433feefb15bE69) |
+| FeeRoyaltyManager | [0x45994782c576AB76592E5CaE528151d0E56D65e9](https://arbiscan.io/address/0x45994782c576AB76592E5CaE528151d0E56D65e9) |
 
 ## 🚀 Key Features
 
@@ -163,15 +174,6 @@ sequenceDiagram
     MarketplaceCore->>PaymentManager: Hold funds
     MarketplaceCore->>MarketplaceCore: Update highest bid
 ```
-
-## 📜 Contracts Deployed on Arbitrum
-
-| Contract | Address |
-|----------|-----------|
-| MarketplaceCore | [0xB4ae89e0635F6bdF92F64C76d53964e1060e11b4](https://arbiscan.io/address/0xB4ae89e0635F6bdF92F64C76d53964e1060e11b4) |
-| NFTModule | [0x1140D367432f720879b817F404c577620B765531](https://arbiscan.io/address/0x1140D367432f720879b817F404c577620B765531) |
-| PaymentManager | [0x46B7bA6D27869624B013705a9C433feefb15bE69](https://arbiscan.io/address/0x46B7bA6D27869624B013705a9C433feefb15bE69) |
-| FeeRoyaltyManager | [0x45994782c576AB76592E5CaE528151d0E56D65e9](https://arbiscan.io/address/0x45994782c576AB76592E5CaE528151d0E56D65e9) |
 
 ## 🛠️ How to Deploy
 

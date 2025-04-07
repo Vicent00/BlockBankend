@@ -3,8 +3,11 @@ pragma solidity 0.8.26;
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import "../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract NFTModule is IERC721Receiver {
+contract NFTModule is IERC721Receiver, Ownable {
+    constructor() Ownable(msg.sender) {}
+
     // Mapping para verificar si un NFT está en custodia
     mapping(address => mapping(uint256 => bool)) public isInCustody;
 
